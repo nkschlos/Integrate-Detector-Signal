@@ -1,3 +1,8 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.optimize import curve_fit
+from scipy.integrate import simps
+
 def integrate_detector_signal(time:np.ndarray, signal:np.ndarray, plot:bool = True, arrival_time_guess:float = None, signal_width_guess:float = None, background_guess:float = None):
     """
     :param time:                the x-axis of the signal in arbitrary units, as a list or numpy array
