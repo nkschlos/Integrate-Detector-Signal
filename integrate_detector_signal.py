@@ -70,7 +70,7 @@ def integrate_detector_signal(time:np.ndarray, signal:np.ndarray, plot:bool = Tr
     #uncertainty on noise in ROI:
     roi_left = np.logical_and(time<arrival_time - 3.5*signal_width, time>arrival_time - 3*3.5*signal_width)
     est_SE_ROI = np.std(signal[roi_left])
-    area_SE_noiseROI = est_SE_ROI/np.sqrt(np.size(signal_of_interest))
+    area_SE_noiseROI = est_SE_ROI*np.sqrt(np.size(signal_of_interest))*np.mean(np.diff(time_of_interest))
     #add in quadrature
     area_SE = np.linalg.norm([area_SE_background, area_SE_n_sigma, area_SE_noiseROI])
 
