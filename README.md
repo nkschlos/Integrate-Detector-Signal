@@ -1,8 +1,8 @@
 # Integrate-Detector-Signal
-Integrate pulse-like features on a signal and estimate uncertainty in the presence of background and noise.
+Integrate pulse-like features on a signal and estimate uncertainty in the presence of background and noise. Examples of uses include a pulse on a photodetector or PMT, ions arriving on a MCP, etc.
 
 # Demonstration
-An example of the algorithm on a normalized Gaussian with noise and offset. No initial guesses are given.
+An example of the algorithm on a generated signal, a normalized Gaussian with noise and offset. No initial guesses are given.
 
 ![image](https://user-images.githubusercontent.com/39776793/216321454-44e7b34c-e0a4-4137-b59c-bc7c86a525ec.png)
 
