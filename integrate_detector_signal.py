@@ -1,8 +1,3 @@
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.optimize import curve_fit
-from scipy.integrate import simps
-
 def integrate_detector_signal(time:np.ndarray, signal:np.ndarray, plot:bool = True, arrival_time_guess:float = None, signal_width_guess:float = None, background_guess:float = None):
     """
     :param time:                the x-axis of the signal in arbitrary units, as a list or numpy array
@@ -64,6 +59,7 @@ def integrate_detector_signal(time:np.ndarray, signal:np.ndarray, plot:bool = Tr
     Characterize the following sources of uncertainty:
     - uncertainty in the offset
     - uncertainty from the arbitrary assignment of 3.5 sigma as integration bounds, area can change if you vary how far out you integrate
+    - uncertainty from the noise on the region of interest. Since we cannot measure std(roi) background free, we rely on the points to the left of similar size
     """
     #uncertainty from background
     area_SE_background = simps(np.full(np.size(time_of_interest), background_SE), time_of_interest)
@@ -71,8 +67,12 @@ def integrate_detector_signal(time:np.ndarray, signal:np.ndarray, plot:bool = Tr
     roi_list = np.unique([np.logical_and(time>arrival_time-n_sigma*signal_width, time<arrival_time+n_sigma*signal_width) for n_sigma in np.linspace(3.2, 4.5, 100)],axis=0)
     areas_vary_nsigma = [simps(signal[roi] - background, time[roi]) for roi in roi_list]
     area_SE_n_sigma = np.std(areas_vary_nsigma)
+    #uncertainty on noise in ROI:
+    roi_left = np.logical_and(time<arrival_time - 3.5*signal_width, time>arrival_time - 3*3.5*signal_width)
+    est_SE_ROI = np.std(signal[roi_left])
+    area_SE_noiseROI = est_SE_ROI/np.sqrt(np.size(signal_of_interest))
     #add in quadrature
-    area_SE = np.linalg.norm([area_SE_background, area_SE_n_sigma])
+    area_SE = np.linalg.norm([area_SE_background, area_SE_n_sigma, area_SE_noiseROI])
 
     ### Plot ###
 
@@ -81,7 +81,7 @@ def integrate_detector_signal(time:np.ndarray, signal:np.ndarray, plot:bool = Tr
         plt_back = plt.scatter(time_background, signal_background)
         plt_roi = plt.scatter(time_of_interest, signal_of_interest)
         plt_fill = plt.fill_between(time_of_interest, signal_of_interest, background, alpha = 0.2, color = 'green')
-        dense_times = np.linspace(np.min(time), np.max(time), 1000)
+        dense_times = np.linspace(np.min(time), np.max(time), 200)
         dense_gaussian = fit_params[0]*np.exp(np.divide(-np.square(dense_times - fit_params[2]), 2*fit_params[1]**2)) + fit_params[3]
         plt_fit, = plt.plot(dense_times, dense_gaussian, color = 'black')
         plt.grid()
@@ -91,3 +91,4 @@ def integrate_detector_signal(time:np.ndarray, signal:np.ndarray, plot:bool = Tr
     ### Return ###
 
     return area, area_SE
+    
